@@ -3,52 +3,172 @@
 import logging
 import os
 import pathlib
+from ast import literal_eval
 
 import typer
+from polus.images.formats.pyramid_generator_2d.pyramid_generator_2d import (
+    pyramid_generator_2d_img_collection,
+    pyramid_generator_2d_single_img,
+)
 
 logging.basicConfig(
     format="%(asctime)s - %(name)-8s - %(levelname)-8s - %(message)s",
     datefmt="%d-%b-%y %H:%M:%S",
 )
 POLUS_LOG = getattr(logging, os.environ.get("POLUS_LOG", "INFO"))
-logger = logging.getLogger("polus.images.formats.pyramid-generator-2d")
+logger = logging.getLogger("polus.images.formats.pyramid_generator_2d")
 logger.setLevel(POLUS_LOG)
 
-POLUS_IMG_EXT = os.environ.get("POLUS_IMG_EXT", ".ome.tif")
-POLUS_TAB_EXT = os.environ.get("POLUS_TAB_EXT", ".csv")
 app = typer.Typer()
 
 
 @app.command()
 def main(
-    fileExtension: str = typer.Option(
+    input_path: pathlib.Path = typer.Option(
         ...,
-        help="None",
+        "--inputPath",
+        help="Path to directory containing images or path to a single image.",
+        exists=True,
+        readable=True,
+        resolve_path=True,
+        file_okay=True,
+        dir_okay=True,
     ),
-    filePattern: str = typer.Option(
+    filename_pattern: str = typer.Option(
         "",
-        help="None",
+        "--filenamePattern",
+        help=(
+            "Filename pattern used to select images from input directory. "
+            "Ignored if input is a single image."
+        ),
     ),
-    inpDir: pathlib.Path = typer.Option(
+    output_path: pathlib.Path = typer.Option(
         ...,
-        help="None",
+        "--outputPath",
+        help="Path of output directory.",
         exists=True,
-        file_okay=False,
-        dir_okay=True,
+        writable=True,
         resolve_path=True,
-        readable=True,
+        file_okay=False,
     ),
-    outDir: pathlib.Path = typer.Option(
+    out_img_name: str = typer.Option(
+        "",
+        "--outImgName",
+        help="Name of the output image. Only needed when input is a directory",
+    ),
+    min_dim: int = typer.Option(
         ...,
-        help="None",
-        exists=True,
-        file_okay=False,
-        dir_okay=True,
-        resolve_path=True,
-        readable=True,
+        "--minDim",
+        help="Minimum dimension of the image pyramid.",
     ),
-):
-    """CLI for the Pyramid Generator 2D tool."""
+    output_format: str = typer.Option(
+        ...,
+        "--outputFormat",
+        help="Output format of the image pyramid. Options are 'NG_Zarr', 'PCNG', 'Viv'.",
+    ),
+    downsample_method: str = typer.Option(
+        "",
+        "--downsampleMethod",
+        help=(
+            "Downsample method. Specify using a dictionary string with the "
+            "channel number as the key and the method as the value. channel "
+            "number ranges from 0 to n_channels - 1. available methods are "
+            "'mean', 'mode_max', 'mode_min'. Example: '{0:\"mean\", 1:\"mode_max\"}'. "
+            "If not specified, all channels will be downsampled using the mean "
+        ),
+    ),
+) -> None:
+    """CLI for the Pyramid Generator tool.
+
+    Calls the Pyramid Generator tool to generate image pyramids from a single image or a collection of images.
+
+    Args:
+        input_path (pathlib.Path): Path to directory containing images or path to a single image.
+        filename_pattern (str): Filename pattern used to select images from input directory. Ignored if input is a single image.
+        output_path (pathlib.Path): Path to output directory.
+        out_img_name (str): Name of the output image. Only needed when input is a directory.
+        min_dim (int): Minimum dimension of the image pyramid.
+        output_format (str): Output format of the image pyramid. Options are 'NG_Zarr', 'PCNG', 'Viv'.
+        downsample_method (str): Downsample method. Specify using a dictionary string with the channel number as the key and the method as the value. channel number ranges from 0 to n_channels - 1. available methods are 'mean', 'mode_max', 'mode_min'. Example: '{0:mean, 1:mode_max}'If not specified, all channels will be downsampled using the mean
+    """
+    logger.info("Starting Pyramid Generator Tool ...")
+
+    logger.info("inputPath = %s", str(input_path))
+    logger.info("filenamePattern = %s", filename_pattern if filename_pattern else "N/A")
+    logger.info("outputPath = %s", output_path)
+    logger.info("outImgName = %s", out_img_name if out_img_name else "N/A")
+    logger.info("minDim = %d", min_dim)
+    logger.info("outputFormat = %s", output_format)
+    logger.info("downsampleMethod = %s", downsample_method)
+
+    gen_from_single_img = False
+    if input_path.is_dir():
+        logger.info("Input is a directory.")
+        # Generate pyramid from image collection
+        if filename_pattern == "":
+            logger.error(
+                "Filename pattern must be provided when input is a directory.",
+                exc_info=True,
+                stack_info=True,
+            )
+            raise typer.Exit(code=1)
+        if out_img_name == "":
+            logger.error(
+                "Output image name must be provided when input is a directory.",
+                exc_info=True,
+                stack_info=True,
+            )
+            raise typer.Exit(code=1)
+    elif input_path.is_file():
+        logger.info("Input is a single image.")
+        # Generate pyramid from single image
+        gen_from_single_img = True
+
+    # parse downsample method, turn string into dictionary
+    downsample_dict = {}
+    if downsample_method:
+        try:
+            downsample_dict = literal_eval(downsample_method)
+        except Exception as e:
+            logger.exception(e, exc_info=True, stack_info=True)
+            raise typer.Exit(code=1)
+
+    # validate output format
+    available_formats = {"NG_Zarr", "PCNG", "Viv"}
+    if output_format not in available_formats:
+        logger.error(
+            "Invalid output format: %s.", output_format, exc_info=True, stack_info=True
+        )
+        raise typer.Exit(code=1)
+
+    # validate downsample method
+    avaliable_methods = {"mean", "mode_max", "mode_min"}
+    for _, value in downsample_dict.items():
+        if value not in avaliable_methods:
+            logger.error(
+                "Invalid downsample method: %s.", value, exc_info=True, stack_info=True
+            )
+            raise typer.Exit(code=1)
+
+    # call argolid
+    if gen_from_single_img:
+        pyramid_generator_2d_single_img(
+            input_path=input_path,
+            output_path=output_path,
+            min_dim=min_dim,
+            output_format=output_format,
+            downsample_dict=downsample_dict,
+        )
+    else:
+        pyramid_generator_2d_img_collection(
+            input_path=input_path,
+            filename_pattern=filename_pattern,
+            out_img_name=out_img_name,
+            output_path=output_path,
+            min_dim=min_dim,
+            output_format=output_format,
+            downsample_dict=downsample_dict,
+        )
 
 
 if __name__ == "__main__":
