@@ -1,4 +1,4 @@
-# Pyramid Generator 2D (0.1.0)
+# Pyramid Generator 2D (0.1.1-dev0)
 
 Generate 2D Image Pyramid
 
