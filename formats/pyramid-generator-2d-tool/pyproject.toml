@@ -19,6 +19,7 @@ pytest = "^8.3"
 pytest-sugar = "^1.0"
 pytest-xdist = "^3.6"
 pre-commit = "^3.8"
+requests = "^2.32.3"
 
 [build-system]
 requires = ["poetry-core"]
