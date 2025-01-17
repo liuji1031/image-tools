@@ -152,19 +152,23 @@ def main(
 
     # call argolid
     if gen_from_single_img:
-        pyramid_generator_2d_single_img(
-            input_path=input_path,
-            output_path=output_path,
-            min_dim=min_dim,
-            output_format=output_format,
-            downsample_dict=downsample_dict,
-        )
+        try:
+            pyramid_generator_2d_single_img(
+                input_path=str(input_path),
+                output_path=str(output_path),
+                min_dim=min_dim,
+                output_format=output_format,
+                downsample_dict=downsample_dict,
+            )
+        except Exception as e:
+            logger.exception(e, exc_info=True, stack_info=True)
+            raise typer.Exit(code=1)
     else:
         pyramid_generator_2d_img_collection(
-            input_path=input_path,
+            input_path=str(input_path),
             filename_pattern=filename_pattern,
             out_img_name=out_img_name,
-            output_path=output_path,
+            output_path=str(output_path),
             min_dim=min_dim,
             output_format=output_format,
             downsample_dict=downsample_dict,
