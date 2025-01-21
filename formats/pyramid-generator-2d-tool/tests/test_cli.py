@@ -67,22 +67,25 @@ def gen_single_image():
     output_path = Path("data/output/single_image")
     output_path.mkdir(parents=True, exist_ok=True)
 
-    img_path = _gen_random_img(input_path, "random_img.tif", 2048)
+    # img_path = _gen_random_img(input_path, "random_img.tif", 2048)
+    img_path = _get_real_img(input_path)
 
     return img_path, str(output_path)
 
 
-@pytest.fixture
-def gen_single_image_default_params():
+@pytest.fixture(
+    params=[[128, "NG_Zarr", '{0: "mean"}'], [128, "Viv", '{0: "mean"}']],
+    ids=["128_NG_Zarr", "128_Viv"],
+)
+def gen_single_image_params(request):
     """Return the default parameters for the single image."""
-    # min_dim, output_format, downsample_dict
-    return 128, "NG_Zarr", '{0: "mean"}'
+    return request.param
 
 
-def test_cli_single_img(gen_single_image, gen_single_image_default_params):
+def test_cli_single_img(gen_single_image, gen_single_image_params):
     """Test the command line."""
     input_path, output_path = gen_single_image
-    min_dim, output_format, downsample_dict = gen_single_image_default_params
+    min_dim, output_format, downsample_dict = gen_single_image_params
 
     runner = CliRunner()
     result = runner.invoke(
@@ -103,3 +106,7 @@ def test_cli_single_img(gen_single_image, gen_single_image_default_params):
 
     # Test for a successful run
     assert result.exit_code == 0
+
+
+def test_cli_parsing():
+    """Test command line argument parsing."""

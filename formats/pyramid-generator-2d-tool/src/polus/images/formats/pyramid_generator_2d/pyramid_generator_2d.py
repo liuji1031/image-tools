@@ -1,8 +1,12 @@
 """Pyramid Generator 2D."""
+import logging
 import pathlib
 import typing
 
 from argolid import PyramidGenerartor
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 def pyramid_generator_2d_single_img(
@@ -22,7 +26,7 @@ def pyramid_generator_2d_single_img(
         downsample_dict (typing.Dict[int, str]): Dictionary with channel number as key and method as value.
     """
     pg = PyramidGenerartor()
-    print(downsample_dict)
+    logger.info("Downsample method: %s", downsample_dict)
     pg.generate_from_single_image(
         input_file=input_path,
         output_dir=output_path,

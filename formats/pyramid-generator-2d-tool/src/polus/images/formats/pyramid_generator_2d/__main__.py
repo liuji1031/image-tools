@@ -111,14 +111,18 @@ def main(
                 exc_info=True,
                 stack_info=True,
             )
-            raise typer.Exit(code=1)
+            raise ValueError(
+                "Filename pattern must be provided when input is a directory."
+            )
         if out_img_name == "":
             logger.error(
                 "Output image name must be provided when input is a directory.",
                 exc_info=True,
                 stack_info=True,
             )
-            raise typer.Exit(code=1)
+            raise ValueError(
+                "Output image name must be provided when input is a directory."
+            )
     elif input_path.is_file():
         logger.info("Input is a single image.")
         # Generate pyramid from single image
@@ -131,7 +135,7 @@ def main(
             downsample_dict = literal_eval(downsample_method)
         except Exception as e:
             logger.exception(e, exc_info=True, stack_info=True)
-            raise typer.Exit(code=1)
+            raise ValueError("Invalid downsample method.") from e
 
     # validate output format
     available_formats = {"NG_Zarr", "PCNG", "Viv"}
@@ -139,7 +143,7 @@ def main(
         logger.error(
             "Invalid output format: %s.", output_format, exc_info=True, stack_info=True
         )
-        raise typer.Exit(code=1)
+        raise ValueError("Invalid output format.")
 
     # validate downsample method
     avaliable_methods = {"mean", "mode_max", "mode_min"}
@@ -148,7 +152,7 @@ def main(
             logger.error(
                 "Invalid downsample method: %s.", value, exc_info=True, stack_info=True
             )
-            raise typer.Exit(code=1)
+            raise ValueError("Invalid downsample method.")
 
     # call argolid
     if gen_from_single_img:
