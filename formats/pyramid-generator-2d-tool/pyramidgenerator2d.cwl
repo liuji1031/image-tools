@@ -2,17 +2,17 @@ class: CommandLineTool
 cwlVersion: v1.2
 
 inputs:
-  inputPath:
+  inpDir:
     inputBinding:
-      prefix: --inputPath
+      prefix: --inpDir
     type: Directory
   filePattern:
     inputBinding:
       prefix: --filePattern
     type: string?
-  outputPath:
+  outDir:
     inputBinding:
-      prefix: --outputPath
+      prefix: --outDir
     type: Directory
   outImgName:
     inputBinding:
@@ -22,19 +22,19 @@ inputs:
     inputBinding:
       prefix: --minDim
     type: int
-  outputFormat:
+  outFormat:
     inputBinding:
-      prefix: --outputFormat
+      prefix: --outFormat
     type: string
-  downsampleMethod:
+  dsMethod:
     inputBinding:
-      prefix: --downsampleMethod
+      prefix: --dsMethod
     type: string?
 
 outputs:
-  outputPath:
+  outDir:
     outputBinding:
-      glob: $(inputs.outputPath.basename)
+      glob: $(inputs.outDir.basename)
     type: Directory
 
 requirements:

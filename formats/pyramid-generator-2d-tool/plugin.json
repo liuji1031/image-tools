@@ -17,23 +17,54 @@
   "inputs": {
     "inpDir": {
       "type": "collection",
-      "title": "Input collection",
-      "description": "Input image collection to be processed by this tool.",
+      "title": "Input directory",
+      "description": "Path to directory containing images or path to a single image.",
       "required": "True"
     },
     "filePattern": {
       "type": "string",
       "title": "Filename pattern",
-      "description": "Filename pattern used to separate data.",
+      "description": "Filename pattern used to find images.",
       "required": "False",
-      "default": ".*"
+      "default": ""
     },
-    "preview": {
-      "type": "boolean",
-      "title": "Preview",
-      "description": "Generate an output preview.",
+    "outDir": {
+      "type": "collection",
+      "title": "Output directory",
+      "description": "Path of output directory.",
+      "required": "True"
+    },
+    "outImgName": {
+      "type": "string",
+      "title": "Output image name",
+      "description": "Name of the output image. Only needed when input is a directory.",
+      "required": "True"
+    },
+    "minDim": {
+      "type": "number",
+      "title": "Minimum dimension",
+      "description": "Minimum dimension of the pyramid.",
+      "required": "True"
+    },
+    "outFormat": {
+      "type": "enum",
+      "options": {
+        "values": [
+          "NG_Zarr",
+          "PCNG",
+          "Viv"
+        ]
+      },
+      "title": "Output Format",
+      "description": "Output format of the image pyramid.",
+      "required": "True"
+    },
+    "dsMethod": {
+      "type": "string",
+      "title": "Downsample method",
+      "description": "Downsample method for generating pyramid. Default to 'mean' for all channels. Specify as a dictionary with channel no as key and method as value. Available methods are 'mean','mode_min', 'mode_max'.",
       "required": "False",
-      "default": "False"
+      "default": ""
     }
   },
   "outputs": {
@@ -42,26 +73,42 @@
       "description": "Output collection."
     }
   },
-  "ui": {
-    "inpDir": {
-      "type": "collection",
-      "title": "Input collection",
-      "description": "Input image collection to be processed by this tool.",
-      "required": "True"
+  "ui": [
+    {
+      "key": "inputs.imgDir",
+      "title": "Image directory",
+      "description": "Path to directory containing images or path to a single image."
     },
-    "filePattern": {
-      "type": "string",
+    {
+      "key": "inputs.filePattern",
       "title": "Filename pattern",
-      "description": "Filename pattern used to separate data.",
-      "required": "False",
-      "default": "False"
+      "description": "Filename pattern used to find images."
     },
-    "preview": {
-      "type": "boolean",
-      "title": "Filename pattern",
-      "description": "Generate an output preview.",
-      "required": "False",
-      "default": "False"
+    {
+      "key": "inputs.outDir",
+      "title": "Output directory",
+      "description": "Path of output directory."
+    },
+    {
+      "key": "inputs.outImgName",
+      "title": "Output image name",
+      "description": "Name of the output image. Only needed when input is a directory."
+    },
+    {
+      "key": "inputs.minDim",
+      "title": "Minimum dimension",
+      "description": "Minimum dimension of the pyramid."
+    },
+    {
+      "key": "inputs.outFormat",
+      "title": "Output Format",
+      "description": "Output format of the image pyramid."
+    },
+    {
+      "key": "inputs.dsMethod",
+      "title": "Downsample method",
+      "description": "Downsample method for generating pyramid. Default to 'mean' for all channels. Specify as a dictionary with channel no as key and method as value. Available methods are 'mean','mode_min', 'mode_max'."
     }
-  }
+  ]
+
 }
