@@ -60,12 +60,27 @@ def _gen_random_img(path2save: Path, filename: str, size: int):
 
 
 @pytest.fixture
-def gen_single_image_path() -> typing.Generator[typing.Tuple[Path, Path], None, None]:
+def gen_data_path() -> typing.Generator[Path, None, None]:
+    """Generate a temporary path."""
+    data_path = Path("data")
+    data_path.mkdir(parents=True, exist_ok=True)
+
+    yield data_path
+
+    # delete the temporary path
+    shutil.rmtree(data_path)
+
+
+@pytest.fixture
+def gen_single_image_path(
+    gen_data_path,
+) -> typing.Generator[typing.Tuple[Path, Path], None, None]:
     """Generate input and output path for single image test."""
-    input_path = Path("data/input/single_image")
+    data_path = gen_data_path
+    input_path = data_path / "input/single_image"
     input_path.mkdir(parents=True, exist_ok=True)
 
-    output_path = Path("data/output/single_image")
+    output_path = data_path / "output/single_image"
     output_path.mkdir(parents=True, exist_ok=True)
 
     yield input_path, output_path
@@ -92,14 +107,15 @@ def gen_single_image(
 
 
 @pytest.fixture
-def gen_image_collection_path() -> (
-    typing.Generator[typing.Tuple[Path, Path], None, None]
-):
+def gen_image_collection_path(
+    gen_data_path,
+) -> typing.Generator[typing.Tuple[Path, Path], None, None]:
     """Generate input and output path for image collection test."""
-    input_path = Path("data/input/image_collection")
+    data_path = gen_data_path
+    input_path = data_path / "input/image_collection"
     input_path.mkdir(parents=True, exist_ok=True)
 
-    output_path = Path("data/output/image_collection")
+    output_path = data_path / "output/image_collection"
     output_path.mkdir(parents=True, exist_ok=True)
 
     yield input_path, output_path
