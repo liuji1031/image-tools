@@ -38,7 +38,7 @@ def pyramid_generator_2d_single_img(
 
 def pyramid_generator_2d_img_collection(
     input_path: pathlib.Path,
-    filename_pattern: str,
+    file_pattern: str,
     out_img_name: str,
     output_path: pathlib.Path,
     min_dim: int,
@@ -49,7 +49,7 @@ def pyramid_generator_2d_img_collection(
 
     Args:
         input_path (pathlib.Path): Path to the input directory.
-        filename_pattern (str): Filename pattern.
+        file_pattern (str): Filename pattern.
         output_path (pathlib.Path): Path to the output directory.
         out_img_name (str): Name of the output image.
         min_dim (int): Minimum dimension of the image pyramid.
@@ -59,7 +59,7 @@ def pyramid_generator_2d_img_collection(
     pg = PyramidGenerartor()
     pg.generate_from_image_collection(
         collection_path=input_path,
-        pattern=filename_pattern,
+        pattern=file_pattern,
         image_name=out_img_name,
         output_dir=output_path,
         min_dim=min_dim,

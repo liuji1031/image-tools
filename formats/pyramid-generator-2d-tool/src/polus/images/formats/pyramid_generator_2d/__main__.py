@@ -24,7 +24,7 @@ app = typer.Typer()
 
 def _validate_params(
     input_path: pathlib.Path,
-    filename_pattern: str,
+    file_pattern: str,
     out_img_name: str,
     output_format: str,
     downsample_method: str,
@@ -33,7 +33,7 @@ def _validate_params(
 
     Args:
         input_path (pathlib.Path): input path to single image or directory
-        filename_pattern (str): filename pattern used to select images from input directory
+        file_pattern (str): filename pattern used to select images from input directory
         out_img_name (str): name of the output image
         output_format (str): output format of the image pyramid
         downsample_method (str): downsample method
@@ -46,7 +46,7 @@ def _validate_params(
     if input_path.is_dir():
         logger.info("Input is a directory.")
         # Generate pyramid from image collection
-        if filename_pattern == "":
+        if file_pattern == "":
             raise ValueError(
                 "Filename pattern must be provided when input is a directory."
             )
@@ -93,9 +93,9 @@ def main(
         file_okay=True,
         dir_okay=True,
     ),
-    filename_pattern: str = typer.Option(
+    file_pattern: str = typer.Option(
         "",
-        "--filenamePattern",
+        "--filePattern",
         help=(
             "Filename pattern used to select images from input directory. "
             "Ignored if input is a single image."
@@ -143,7 +143,7 @@ def main(
 
     Args:
         input_path (pathlib.Path): Path to directory containing images or path to a single image.
-        filename_pattern (str): Filename pattern used to select images from input directory. Ignored if input is a single image.
+        file_pattern (str): Filename pattern used to select images from input directory. Ignored if input is a single image.
         output_path (pathlib.Path): Path to output directory.
         out_img_name (str): Name of the output image. Only needed when input is a directory.
         min_dim (int): Minimum dimension of the image pyramid.
@@ -153,7 +153,7 @@ def main(
     logger.info("Starting Pyramid Generator Tool ...")
 
     logger.info("inputPath = %s", str(input_path))
-    logger.info("filenamePattern = %s", filename_pattern if filename_pattern else "N/A")
+    logger.info("filePattern = %s", file_pattern if file_pattern else "N/A")
     logger.info("outputPath = %s", output_path)
     logger.info("outImgName = %s", out_img_name if out_img_name else "N/A")
     logger.info("minDim = %d", min_dim)
@@ -162,7 +162,7 @@ def main(
 
     gen_from_single_img, downsample_dict = _validate_params(
         input_path=input_path,
-        filename_pattern=filename_pattern,
+        file_pattern=file_pattern,
         out_img_name=out_img_name,
         output_format=output_format,
         downsample_method=downsample_method,
@@ -180,7 +180,7 @@ def main(
     else:
         pyramid_generator_2d_img_collection(
             input_path=str(input_path),
-            filename_pattern=filename_pattern,
+            file_pattern=file_pattern,
             out_img_name=out_img_name,
             output_path=str(output_path),
             min_dim=min_dim,
