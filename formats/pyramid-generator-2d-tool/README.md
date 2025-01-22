@@ -8,9 +8,9 @@ This image tool generates 2D image pyramid from either a single image or a direc
 | `--inputPath`        | Path to directory containing images or path to a single image.              | Input   | collection | Yes |
 | `--filePattern`  | Filename pattern used to select images from input directory. <br/>Ignored if input is a single image.  | Input   | string | No, unless `--inputPath` is a directory |
 | `--outputPath`       | Path of output directory.                                                 | Output   | collection    | Yes |
-| `--outImgName`       | Name of the output image. Only needed when input is a directory.         | Output   | string    | No, unless `--inputPath` is a directory |
+| `--outImgName`       | Name of the output image. Only needed when input is a directory.         | Input   | string    | No, unless `--inputPath` is a directory |
 | `--minDim`           | Minimum dimension of the image pyramid.                            | Input   | integer | Yes |
-| `--outputFormat`     | Output format of the image pyramid. Options are "NG_Zarr", "PCNG", "Viv".  | Output   | string | Yes |
+| `--outputFormat`     | Output format of the image pyramid. Options are "NG_Zarr", "PCNG", "Viv".  | Input   | string | Yes |
 | `--downsampleMethod` | Downsample method. Specify using a dictionary string with the <br/> channel number as the key and the method as the value. channel <br/>number ranges from 0 to n_channels-1. Available methods are <br/>"mean", "mode_max", "mode_min". Example: '{0:\"mean\"}'. <br/>If not specified, all channels will be downsampled using "mean". | Input   | string    | No |
 
 ## Usage
