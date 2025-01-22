@@ -113,7 +113,7 @@ def main(
     out_img_name: str = typer.Option(
         "",
         "--outImgName",
-        help="Name of the output image. Only needed when input is a directory",
+        help="Name of the output image. Only needed when input is a directory.",
     ),
     min_dim: int = typer.Option(
         ...,
