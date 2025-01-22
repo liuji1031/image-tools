@@ -22,6 +22,65 @@ logger.setLevel(POLUS_LOG)
 app = typer.Typer()
 
 
+def _validate_params(
+    input_path: pathlib.Path,
+    filename_pattern: str,
+    out_img_name: str,
+    output_format: str,
+    downsample_method: str,
+):
+    """Validate the command line parameters.
+
+    Args:
+        input_path (pathlib.Path): input path to single image or directory
+        filename_pattern (str): filename pattern used to select images from input directory
+        out_img_name (str): name of the output image
+        output_format (str): output format of the image pyramid
+        downsample_method (str): downsample method
+
+    Returns:
+        bool: True if generating from single image, False if generating from image collection
+        dict: parsed downsample method
+    """
+    gen_from_single_img = False
+    if input_path.is_dir():
+        logger.info("Input is a directory.")
+        # Generate pyramid from image collection
+        if filename_pattern == "":
+            raise ValueError(
+                "Filename pattern must be provided when input is a directory."
+            )
+        if out_img_name == "":
+            raise ValueError(
+                "Output image name must be provided when input is a directory."
+            )
+    elif input_path.is_file():
+        logger.info("Input is a single image.")
+        # Generate pyramid from single image
+        gen_from_single_img = True
+
+    # parse downsample method, turn string into dictionary
+    downsample_dict = {}
+    if downsample_method:
+        try:
+            downsample_dict = literal_eval(downsample_method)
+        except Exception as e:
+            raise ValueError("Invalid downsample method.") from e
+
+    # validate output format
+    available_formats = {"NG_Zarr", "PCNG", "Viv"}
+    if output_format not in available_formats:
+        raise ValueError("Invalid output format.")
+
+    # validate downsample method
+    avaliable_methods = {"mean", "mode_max", "mode_min"}
+    for _, value in downsample_dict.items():
+        if value not in avaliable_methods:
+            raise ValueError("Invalid downsample method.")
+
+    return gen_from_single_img, downsample_dict
+
+
 @app.command()
 def main(
     input_path: pathlib.Path = typer.Option(
@@ -101,72 +160,23 @@ def main(
     logger.info("outputFormat = %s", output_format)
     logger.info("downsampleMethod = %s", downsample_method)
 
-    gen_from_single_img = False
-    if input_path.is_dir():
-        logger.info("Input is a directory.")
-        # Generate pyramid from image collection
-        if filename_pattern == "":
-            logger.error(
-                "Filename pattern must be provided when input is a directory.",
-                exc_info=True,
-                stack_info=True,
-            )
-            raise ValueError(
-                "Filename pattern must be provided when input is a directory."
-            )
-        if out_img_name == "":
-            logger.error(
-                "Output image name must be provided when input is a directory.",
-                exc_info=True,
-                stack_info=True,
-            )
-            raise ValueError(
-                "Output image name must be provided when input is a directory."
-            )
-    elif input_path.is_file():
-        logger.info("Input is a single image.")
-        # Generate pyramid from single image
-        gen_from_single_img = True
-
-    # parse downsample method, turn string into dictionary
-    downsample_dict = {}
-    if downsample_method:
-        try:
-            downsample_dict = literal_eval(downsample_method)
-        except Exception as e:
-            logger.exception(e, exc_info=True, stack_info=True)
-            raise ValueError("Invalid downsample method.") from e
-
-    # validate output format
-    available_formats = {"NG_Zarr", "PCNG", "Viv"}
-    if output_format not in available_formats:
-        logger.error(
-            "Invalid output format: %s.", output_format, exc_info=True, stack_info=True
-        )
-        raise ValueError("Invalid output format.")
-
-    # validate downsample method
-    avaliable_methods = {"mean", "mode_max", "mode_min"}
-    for _, value in downsample_dict.items():
-        if value not in avaliable_methods:
-            logger.error(
-                "Invalid downsample method: %s.", value, exc_info=True, stack_info=True
-            )
-            raise ValueError("Invalid downsample method.")
+    gen_from_single_img, downsample_dict = _validate_params(
+        input_path=input_path,
+        filename_pattern=filename_pattern,
+        out_img_name=out_img_name,
+        output_format=output_format,
+        downsample_method=downsample_method,
+    )
 
     # call argolid
     if gen_from_single_img:
-        try:
-            pyramid_generator_2d_single_img(
-                input_path=str(input_path),
-                output_path=str(output_path),
-                min_dim=min_dim,
-                output_format=output_format,
-                downsample_dict=downsample_dict,
-            )
-        except Exception as e:
-            logger.exception(e, exc_info=True, stack_info=True)
-            raise typer.Exit(code=1)
+        pyramid_generator_2d_single_img(
+            input_path=str(input_path),
+            output_path=str(output_path),
+            min_dim=min_dim,
+            output_format=output_format,
+            downsample_dict=downsample_dict,
+        )
     else:
         pyramid_generator_2d_img_collection(
             input_path=str(input_path),
