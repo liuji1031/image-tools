@@ -75,7 +75,7 @@
   },
   "ui": [
     {
-      "key": "inputs.imgDir",
+      "key": "inputs.inpDir",
       "title": "Image directory",
       "description": "Path to directory containing images or path to a single image."
     },
