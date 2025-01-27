@@ -1,4 +1,4 @@
-FROM polusai/bfio:2.1.9
+FROM polusai/bfio:2.4.7
 
 # environment variables defined in polusai/bfio
 ENV EXEC_DIR="/opt/executables"
@@ -10,7 +10,7 @@ ENV POLUS_LOG="INFO"
 WORKDIR ${EXEC_DIR}
 
 # TODO: Change the tool_dir to the tool directory
-ENV TOOL_DIR="formats/pyramid_generator_2d"
+ENV TOOL_DIR="formats/pyramid-generator-2d-tool"
 
 # Copy the repository into the container
 RUN mkdir image-tools
@@ -21,5 +21,5 @@ RUN pip3 install "${EXEC_DIR}/image-tools/${TOOL_DIR}" --no-cache-dir
 
 # Set the entrypoint
 # TODO: Change the entrypoint to the tool entrypoint
-ENTRYPOINT ["python3", "-m", "polus.images.formats.pyramid-generator-2d"]
+ENTRYPOINT ["python3", "-m", "polus.images.formats.pyramid_generator_2d"]
 CMD ["--help"]
