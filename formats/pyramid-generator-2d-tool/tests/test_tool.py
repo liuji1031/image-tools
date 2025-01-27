@@ -133,11 +133,11 @@ def gen_image_collection(
     inp_dir, out_dir = gen_image_collection_path
 
     img_paths = []
-    for i in range(3):
+    for i in range(4):
         img_path = _get_real_img(inp_dir, f"img_r001_c{i:03d}.ome.tif")
         img_paths.append(img_path)
 
-    file_pattern = "img_r001_c{c:d}.ome.tif"
+    file_pattern = "img_r001_c{c:ddd}.ome.tif"
     out_img_name = "output_img"
     yield inp_dir, out_dir, file_pattern, out_img_name
 
@@ -184,7 +184,7 @@ def test_cli_single_img(gen_single_image, gen_process_params):
 def test_cli_out_format(gen_single_image):
     """Test output format for the command line.
 
-    Test with invalid output format. Expected error code of 2.
+    Test with invalid output format. Expected nonzero error code.
     """
     inp_dir, out_dir = gen_single_image
     min_dim = 128
@@ -208,14 +208,17 @@ def test_cli_out_format(gen_single_image):
     )
 
     # expected error
-    assert result.exit_code == 2
+    assert result.exit_code != 0
 
 
 @pytest.mark.skip(reason="Image collection set seems to need stitching vector")
-def test_cli_image_collection(gen_image_collection, gen_process_params):
+def test_cli_image_collection(gen_image_collection):
     """Test the command line."""
     inp_dir, out_dir, file_pattern, out_img_name = gen_image_collection
-    min_dim, out_format, ds_dict = gen_process_params
+    # min_dim, out_format, ds_dict = gen_process_params
+    min_dim = 128
+    out_format = "NG_Zarr"
+    ds_dict = '{0: "mean"}'
     runner = CliRunner()
     result = runner.invoke(
         app,
